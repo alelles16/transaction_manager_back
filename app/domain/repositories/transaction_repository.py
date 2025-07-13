@@ -1,9 +1,7 @@
 from abc import ABC, abstractmethod
 from uuid import UUID
-from datetime import datetime
-from typing import List, Optional
+from typing import List
 from app.domain.models.transaction import Transaction
-from app.domain.models.transaction_status import TransactionStatus
 
 
 class TransactionRepository(ABC):

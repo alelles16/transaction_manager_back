@@ -2,6 +2,7 @@ from app.infrastructure.workers.celery_app import celery_app
 from app.infrastructure.database.repository_impl import TransactionRepositoryImpl
 from app.domain.models.transaction_status import TransactionStatus
 import csv
+import os
 
 
 def process_csv_file(file_path: str):
@@ -11,7 +12,7 @@ def process_csv_file(file_path: str):
     num_records = 0
     total_debit = 0
     total_credit = 0
-    with open(file_path, newline='', encoding='utf-8') as file:
+    with open(file_path, newline="", encoding="utf-8") as file:
         reader = csv.DictReader(file)
         expected_fields = {"id", "date", "type", "amount"}
 
@@ -21,9 +22,9 @@ def process_csv_file(file_path: str):
         for row in reader:
             try:
                 amount = float(row["amount"])
-                if row["type"] == "debit":
+                if row["type"].lower() == "debit":
                     total_debit += amount
-                elif row["type"] == "credit":
+                elif row["type"].lower() == "credit":
                     total_credit += amount
                 else:
                     continue
@@ -40,6 +41,7 @@ def process_transaction_file_async(transaction_id: str, file_path: str):
     Process a transaction file asynchronously.
     """
     repo = TransactionRepositoryImpl()
+    message = ""
     try:
         transaction = repo.get_transaction(id=transaction_id)
         transaction.status = TransactionStatus.PROCESSING
@@ -52,6 +54,9 @@ def process_transaction_file_async(transaction_id: str, file_path: str):
         transaction.status = TransactionStatus.DONE
         repo.update_transaction(transaction)
     except Exception as e:
-        return f"Error processing transaction {transaction_id}: {e}"
+        message = f"Error processing transaction {transaction_id}: {e}"
+    finally:
+        if os.path.exists(file_path):
+            os.remove(file_path)
 
-    return f"Transaction {transaction_id} processed successfully!"
+    return message or "Transaction processed successfully!"

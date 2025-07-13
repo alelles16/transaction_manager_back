@@ -5,12 +5,16 @@ from fastapi import UploadFile
 from pathlib import Path
 
 from app.domain.repositories.transaction_repository import TransactionRepository
-from app.infrastructure.workers.tasks.transaction_tasks import process_transaction_file_async
+from app.infrastructure.workers.tasks.transaction_tasks import (
+    process_transaction_file_async,
+)
 from app.domain.models.transaction import Transaction
 from app.domain.models.transaction_status import TransactionStatus
 
 
-def submit_transaction_file(file: UploadFile, repo: TransactionRepository) -> Transaction:
+def submit_transaction_file(
+    file: UploadFile, repo: TransactionRepository
+) -> Transaction:
     """
     Submit a transaction file to the system.
 
@@ -32,9 +36,7 @@ def submit_transaction_file(file: UploadFile, repo: TransactionRepository) -> Tr
         shutil.copyfileobj(file.file, buffer)
 
     transaction = Transaction(
-        id=transaction_id,
-        created_at=datetime.now(),
-        status=TransactionStatus.PENDING
+        id=transaction_id, created_at=datetime.now(), status=TransactionStatus.PENDING
     )
     repo.create_transaction(transaction)
 

@@ -11,3 +11,15 @@ class TransactionResponse(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class TransactionAllResponse(BaseModel):
+    id: UUID
+    created_at: datetime
+    status: TransactionStatus
+    num_records: int
+    total_debit: float
+    total_credit: float
+
+    class Config:
+        orm_mode = True

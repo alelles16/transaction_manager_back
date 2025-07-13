@@ -1,3 +1,5 @@
 id,date,type,amount
 1,2024-01-01,debit,100.00
 2,2024-01-02,credit,50.00
+3,2024-01-02,credit,50.00
+ana,2024-01-02,credit,banana

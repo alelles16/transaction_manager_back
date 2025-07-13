@@ -5,10 +5,12 @@ from fastapi import UploadFile
 from pathlib import Path
 
 from app.domain.repositories.transaction_repository import TransactionRepository
-from app.infrastructure.workers.tasks import process_transaction_async
+from app.infrastructure.workers.tasks.transaction_tasks import process_transaction_file_async
+from app.domain.models.transaction import Transaction
+from app.domain.models.transaction_status import TransactionStatus
 
 
-def submit_transaction_file(file: UploadFile, repo: TransactionRepository) -> uuid.UUID:
+def submit_transaction_file(file: UploadFile, repo: TransactionRepository) -> Transaction:
     """
     Submit a transaction file to the system.
 
@@ -17,7 +19,7 @@ def submit_transaction_file(file: UploadFile, repo: TransactionRepository) -> uu
         repo: The repository for storing the transaction data.
 
     Returns:
-        The ID of the created transaction.
+        The created transaction.
     """
 
     transaction_id = uuid.uuid4()
@@ -29,12 +31,13 @@ def submit_transaction_file(file: UploadFile, repo: TransactionRepository) -> uu
     with open(temp_file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    repo.create_transaction(
+    transaction = Transaction(
         id=transaction_id,
-        created_at=datetime.utcnow(),
-        status="pending"
+        created_at=datetime.now(),
+        status=TransactionStatus.PENDING
     )
+    repo.create_transaction(transaction)
 
-    process_transaction_async.delay(str(transaction_id), str(temp_file_path))
+    process_transaction_file_async.delay(str(transaction_id), str(temp_file_path))
 
-    return transaction_id
+    return transaction

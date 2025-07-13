@@ -8,6 +8,7 @@ services:
       - "8000:8000"
     volumes:
       - .:/app
+      - transactions-data:/tmp/transactions
     environment:
       - DB_HOST=db
       - DB_NAME=${DB_NAME}
@@ -43,9 +44,11 @@ services:
     command: celery -A app.infrastructure.workers.celery_app worker --loglevel=info
     volumes:
       - .:/app
+      - transactions-data:/tmp/transactions
     depends_on:
       - redis
       - db
+      - web
     environment:
       - DB_HOST=db
       - DB_NAME=${DB_NAME}
@@ -60,8 +63,10 @@ services:
       - "5555:5555"
     depends_on:
       - redis
+      - worker
     environment:
       - CELERY_BROKER_URL=${REDIS_URL}
 
 volumes:
   dev-db-data:
+  transactions-data:

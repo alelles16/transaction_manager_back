@@ -24,5 +24,7 @@ RUN pip install -r /tmp/requirements.txt
 COPY . /app
 WORKDIR /app
 
-# Default command
-CMD ["uvicorn", "app.infrastructure.api.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
+CMD ["sh", "/app/entrypoint.sh"]

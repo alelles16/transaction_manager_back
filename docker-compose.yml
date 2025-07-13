@@ -67,6 +67,13 @@ services:
     environment:
       - CELERY_BROKER_URL=${REDIS_URL}
 
+  nginx:
+    build: ./nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - web
+
 volumes:
   dev-db-data:
   transactions-data:

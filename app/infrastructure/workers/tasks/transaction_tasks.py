@@ -54,6 +54,8 @@ def process_transaction_file_async(transaction_id: str, file_path: str):
         transaction.status = TransactionStatus.DONE
         repo.update_transaction(transaction)
     except Exception as e:
+        transaction.status = TransactionStatus.PENDING
+        repo.update_transaction(transaction)
         message = f"Error processing transaction {transaction_id}: {e}"
     finally:
         if os.path.exists(file_path):

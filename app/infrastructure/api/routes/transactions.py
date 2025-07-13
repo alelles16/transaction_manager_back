@@ -12,10 +12,14 @@ from typing import List
 router = APIRouter()
 
 
+def get_transaction_repository():
+    return TransactionRepositoryImpl()
+
+
 @router.post("/transactions/upload")
 def upload_transaction_file(
     file: UploadFile,
-    repo: TransactionRepositoryImpl = Depends(TransactionRepositoryImpl),
+    repo: TransactionRepositoryImpl = Depends(get_transaction_repository),
 ) -> TransactionResponse:
     transaction = submit_transaction_file(file, repo)
     return TransactionResponse(
@@ -26,7 +30,7 @@ def upload_transaction_file(
 @router.get("/transactions/{transaction_id}")
 def get_transaction_by_id(
     transaction_id: str,
-    repo: TransactionRepositoryImpl = Depends(TransactionRepositoryImpl),
+    repo: TransactionRepositoryImpl = Depends(get_transaction_repository),
 ) -> TransactionAllResponse:
     transaction = get_transaction(transaction_id, repo)
     if not transaction:
@@ -43,7 +47,7 @@ def get_transaction_by_id(
 
 @router.get("/transactions")
 def get_all_transactions(
-    repo: TransactionRepositoryImpl = Depends(TransactionRepositoryImpl),
+    repo: TransactionRepositoryImpl = Depends(get_transaction_repository),
 ) -> List[TransactionAllResponse]:
     transactions = list_transactions(repo)
     return [

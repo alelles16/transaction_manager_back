@@ -1,6 +1,6 @@
 from app.domain.repositories.transaction_repository import TransactionRepository
 from app.infrastructure.database.models import TransactionORM
-from app.infrastructure.database.session import SessionLocal
+from app.infrastructure.database.session import SessionLocal as DefaultSessionLocal
 from app.domain.models.transaction import Transaction
 from app.domain.models.transaction_status import TransactionStatus
 from typing import List, Optional
@@ -8,9 +8,11 @@ from uuid import UUID
 
 
 class TransactionRepositoryImpl(TransactionRepository):
+    def __init__(self, session_factory=None):
+        self._session_factory = session_factory or DefaultSessionLocal
 
     def create_transaction(self, transaction: Transaction) -> None:
-        db = SessionLocal()
+        db = self._session_factory()
         try:
             transaction_orm = TransactionORM(
                 id=transaction.id,
@@ -23,7 +25,7 @@ class TransactionRepositoryImpl(TransactionRepository):
             db.close()
 
     def update_transaction(self, transaction: Transaction) -> None:
-        db = SessionLocal()
+        db = self._session_factory()
         try:
             transaction_orm = (
                 db.query(TransactionORM)
@@ -40,7 +42,7 @@ class TransactionRepositoryImpl(TransactionRepository):
             db.close()
 
     def get_transaction(self, id: UUID) -> Optional[Transaction]:
-        db = SessionLocal()
+        db = self._session_factory()
         try:
             transaction_orm = (
                 db.query(TransactionORM).filter(TransactionORM.id == id).first()
@@ -59,7 +61,7 @@ class TransactionRepositoryImpl(TransactionRepository):
             db.close()
 
     def list_transactions(self) -> List[Transaction]:
-        db = SessionLocal()
+        db = self._session_factory()
         try:
             return [
                 Transaction(

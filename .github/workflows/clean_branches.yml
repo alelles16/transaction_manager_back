@@ -27,5 +27,5 @@ jobs:
                   ref: `heads/${headBranch}`,
                 });
               } else {
-                console.log(`Branch ${headBranch} will NOT be deleted`);
+                console.log(`Branch ${headBranch} will not be deleted`);
               }

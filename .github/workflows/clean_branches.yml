@@ -1,0 +1,31 @@
+name: Clean Up Branches
+
+on:
+  pull_request:
+    types:
+      - closed
+
+jobs:
+  clean-up-branches:
+      if: github.event.pull_request.merged == true
+      runs-on: ubuntu-latest
+      permissions:
+        contents: write
+      steps:
+        - name: Delete branch if PR is merged into master
+          uses: actions/github-script@v7
+          with:
+            script: |
+              const pr = context.payload.pull_request;
+              const baseBranch = pr.base.ref; // final branch
+              const headBranch = pr.head.ref; // origin branch
+              if (baseBranch === "master" && headBranch !== "master" && headBranch !== "qa") {
+                console.log(`Deleting branch: ${headBranch}`);
+                await github.rest.git.deleteRef({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  ref: `heads/${headBranch}`,
+                });
+              } else {
+                console.log(`Branch ${headBranch} will NOT be deleted`);
+              }
